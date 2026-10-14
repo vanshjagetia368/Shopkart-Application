@@ -1,21 +1,32 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { getMyProfile, logoutCustomer } from '../services/api';
+import { getMyProfile, logoutCustomer, getWishlistCount } from '../services/api';
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
+  const [user,          setUser]          = useState(null);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Fetch profile and wishlist count in parallel
     getMyProfile()
-      .then(res => setUser(res.data))
-      .catch(() => setUser(null));
+      .then(res => {
+        setUser(res.data);
+        // Only fetch count when authenticated
+        return getWishlistCount();
+      })
+      .then(res => setWishlistCount(res.data.count))
+      .catch(() => {
+        setUser(null);
+        setWishlistCount(0);
+      });
   }, []);
 
   const handleLogout = async () => {
     try {
       await logoutCustomer();
       setUser(null);
+      setWishlistCount(0);
       navigate('/login');
     } catch (err) {
       console.error(err);
@@ -45,12 +56,36 @@ export default function Navbar() {
           >
             Home
           </NavLink>
+
           <NavLink
             to="/products"
             id="nav-products-link"
             className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}
           >
             Products
+          </NavLink>
+
+          {/* Wishlist link with live count badge — Bonus */}
+          <NavLink
+            to="/wishlist"
+            id="nav-wishlist-link"
+            className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            Wishlist
+            {wishlistCount > 0 && (
+              <span style={{
+                background: 'var(--danger)',
+                color: 'white',
+                fontSize: 10, fontWeight: 800,
+                lineHeight: 1, padding: '2px 6px',
+                borderRadius: 'var(--r-full)',
+                minWidth: 18, textAlign: 'center',
+                animation: 'scaleIn 0.2s ease',
+              }}>
+                {wishlistCount}
+              </span>
+            )}
           </NavLink>
         </div>
 

@@ -6,14 +6,13 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
+import Wishlist from './pages/Wishlist';
 import { getMyProfile } from './services/api';
 
 // ─────────────────────────────────────────────────────────────
 // ProtectedRoute — wraps any route that requires authentication.
-// 1. Calls GET /customers/me on mount (checks HttpOnly cookie).
-// 2. Shows a spinner while the check is in progress.
-// 3. If cookie is valid  → renders children (the page).
-// 4. If 401 / no cookie  → redirects to /login.
+// Calls GET /customers/me to verify HttpOnly cookie is valid.
+// Redirects to /login if not authenticated.
 // ─────────────────────────────────────────────────────────────
 function ProtectedRoute({ children }) {
   const [status, setStatus] = useState('loading'); // 'loading' | 'auth' | 'unauth'
@@ -57,7 +56,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="/home" replace />} />
 
-                {/* Protected — requires login */}
+                {/* Protected routes — require valid JWT cookie */}
                 <Route
                   path="/home"
                   element={
@@ -66,9 +65,17 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/wishlist"
+                  element={
+                    <ProtectedRoute>
+                      <Wishlist />
+                    </ProtectedRoute>
+                  }
+                />
 
-                {/* Public — products are viewable without login */}
-                <Route path="/products"    element={<Products />} />
+                {/* Public — product browsing does not require login */}
+                <Route path="/products"     element={<Products />} />
                 <Route path="/products/:id" element={<ProductDetails />} />
               </Routes>
             </>

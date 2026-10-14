@@ -5,7 +5,8 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const customerRoutes = require("./routes/customer.routes");
-const productRoutes = require("./routes/product.routes");
+const productRoutes  = require("./routes/product.routes");
+const wishlistRoutes = require("./routes/wishlist.routes");
 
 const app = express();
 
@@ -24,7 +25,8 @@ app.use(
 
 // ── Routes ───────────────────────────────────────
 app.use("/customers", customerRoutes);
-app.use("/products", productRoutes);
+app.use("/products",  productRoutes);
+app.use("/wishlist",  wishlistRoutes); // Lab-04
 
 // ── Health Check ─────────────────────────────────
 app.get("/", (req, res) => {
