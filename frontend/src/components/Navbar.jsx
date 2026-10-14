@@ -29,54 +29,59 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
+
         {/* Logo */}
-        <Link to="/home" className="navbar-logo">
-          Shop<span>Kart</span>
+        <Link to="/home" className="navbar-logo" id="nav-logo">
+          ShopKart
+          <span className="navbar-logo-dot" />
         </Link>
 
-        {/* Navigation links */}
+        {/* Centre Links */}
         <div className="navbar-links">
           <NavLink
             to="/home"
+            id="nav-home-link"
             className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}
           >
             Home
           </NavLink>
           <NavLink
             to="/products"
+            id="nav-products-link"
             className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}
           >
             Products
           </NavLink>
         </div>
 
-        {/* User section */}
-        <div className="navbar-user">
+        {/* Right Actions */}
+        <div className="navbar-actions">
           {user ? (
             <>
-              <div className="navbar-avatar" title={user.fullName}>{initials}</div>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: 14 }}>
-                {user.fullName.split(' ')[0]}
-              </span>
+              <div className="navbar-user-chip">
+                <div className="navbar-avatar">{initials}</div>
+                <span className="navbar-user-name">{user.fullName.split(' ')[0]}</span>
+              </div>
               <button
+                id="logout-btn"
                 className="btn btn-ghost btn-sm"
                 onClick={handleLogout}
-                id="logout-btn"
               >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="btn btn-ghost btn-sm" id="nav-login-btn">
-                Login
+              <Link to="/login" id="nav-login-btn" className="btn btn-ghost btn-sm">
+                Sign In
               </Link>
-              <Link to="/register" className="btn btn-primary btn-sm" id="nav-register-btn">
-                Register
+              <Link to="/register" id="nav-register-btn" className="btn btn-primary btn-sm">
+                Get Started
               </Link>
             </>
           )}
         </div>
+
       </div>
     </nav>
   );

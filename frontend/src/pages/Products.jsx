@@ -7,138 +7,151 @@ import { getProducts, getCategories } from '../services/api';
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Initialise from URL query params so deep links work
-  const [filters, setFilters] = useState({
-    search:   searchParams.get('search')   || '',
-    category: searchParams.get('category') || '',
-    sort:     searchParams.get('sort')     || '',
-  });
+  // Sync initial state from URL query params
+  const [search,   setSearch]   = useState(searchParams.get('search')   ?? '');
+  const [category, setCategory] = useState(searchParams.get('category') ?? '');
+  const [sort,     setSort]     = useState(searchParams.get('sort')     ?? '');
 
   const [products,   setProducts]   = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState('');
 
+  // Debounced search timer
+  const [debTimer, setDebTimer] = useState(null);
+
+  // Fetch products whenever filters change
+  const fetchProducts = useCallback(async (s, c, so) => {
+    setLoading(true); setError('');
+    try {
+      const res = await getProducts({ search: s, category: c, sort: so });
+      setProducts(res.data.products);
+    } catch {
+      setError('Failed to load products. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Fetch categories once on mount
   useEffect(() => {
     getCategories()
       .then(res => setCategories(res.data.categories))
-      .catch(() => {}); // non-critical
+      .catch(() => {});
   }, []);
 
-  // Fetch products whenever filters change
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      // Build params — skip empty strings
-      const params = {};
-      if (filters.search)   params.search   = filters.search;
-      if (filters.category) params.category = filters.category;
-      if (filters.sort)     params.sort     = filters.sort;
+  // Debounce search, instant for category/sort
+  const handleChange = ({ search: s, category: c, sort: so }) => {
+    const newSearch   = s  !== undefined ? s  : search;
+    const newCategory = c  !== undefined ? c  : category;
+    const newSort     = so !== undefined ? so : sort;
 
-      // Sync URL
-      setSearchParams(params);
+    setSearch(newSearch);
+    setCategory(newCategory);
+    setSort(newSort);
 
-      const res = await getProducts(params);
-      setProducts(res.data.products);
-    } catch (err) {
-      setError('Something went wrong while loading products.');
-    } finally {
-      setLoading(false);
+    // Update URL params
+    const params = {};
+    if (newSearch)   params.search   = newSearch;
+    if (newCategory) params.category = newCategory;
+    if (newSort)     params.sort     = newSort;
+    setSearchParams(params, { replace: true });
+
+    // Debounce only search; category/sort fire instantly
+    if (s !== undefined) {
+      clearTimeout(debTimer);
+      setDebTimer(setTimeout(() => fetchProducts(newSearch, newCategory, newSort), 380));
+    } else {
+      fetchProducts(newSearch, newCategory, newSort);
     }
-  }, [filters, setSearchParams]);
-
-  useEffect(() => {
-    // Debounce search input — only hit API 400ms after last keystroke
-    const timer = setTimeout(fetchProducts, 400);
-    return () => clearTimeout(timer);
-  }, [fetchProducts]);
-
-  // Lifted state handler for SearchBar
-  const handleFilterChange = updates => {
-    setFilters(prev => ({ ...prev, ...updates }));
   };
 
-  // ── Render ──────────────────────────────────────────
+  // Initial load
+  useEffect(() => {
+    fetchProducts(search, category, sort);
+    // eslint-disable-next-line
+  }, []);
+
   return (
-    <main className="products-page">
-      {/* Header */}
-      <header className="products-header animate-fade-up">
-        <h1 className="products-title">All Products</h1>
-        <p className="products-subtitle">Discover something new today</p>
-      </header>
+    <div className="products-page">
 
-      {/* Search + Filter Bar */}
-      <SearchBar
-        search={filters.search}
-        category={filters.category}
-        sort={filters.sort}
-        categories={categories}
-        onChange={handleFilterChange}
-      />
+      {/* Page header */}
+      <div className="products-page-header anim-fade-up">
+        <h1 className="products-page-title">All Products</h1>
+        <p className="products-page-sub">Discover thousands of curated products across every category</p>
+      </div>
 
-      {/* Results Meta */}
+      {/* Search & Filter */}
+      <div className="anim-fade-up" style={{ animationDelay: '0.05s' }}>
+        <SearchBar
+          search={search}
+          category={category}
+          sort={sort}
+          categories={categories}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* Results count */}
       {!loading && !error && (
-        <p className="results-meta" aria-live="polite">
+        <p className="results-count anim-fade-in">
           Showing <strong>{products.length}</strong> product{products.length !== 1 ? 's' : ''}
-          {filters.search   ? ` for "${filters.search}"` : ''}
-          {filters.category ? ` in ${filters.category}` : ''}
+          {category ? ` in ${category}` : ''}
+          {search ? ` matching "${search}"` : ''}
         </p>
       )}
 
-      {/* ── Loading State ── */}
+      {/* Loading */}
       {loading && (
-        <div className="state-screen" aria-label="Loading products">
+        <div className="state-screen">
           <div className="spinner" />
           <p className="state-subtitle">Loading products...</p>
         </div>
       )}
 
-      {/* ── Error State ── */}
+      {/* Error */}
       {!loading && error && (
-        <div className="state-screen" role="alert">
+        <div className="state-screen">
           <div className="state-icon">⚠️</div>
-          <p className="state-title">Oops!</p>
+          <h2 className="state-title">Something went wrong</h2>
           <p className="state-subtitle">{error}</p>
-          <button className="btn btn-primary" onClick={fetchProducts} id="retry-btn">
+          <button
+            id="retry-btn"
+            className="btn btn-primary"
+            onClick={() => fetchProducts(search, category, sort)}
+          >
             Try Again
           </button>
         </div>
       )}
 
-      {/* ── Empty State ── */}
+      {/* Empty */}
       {!loading && !error && products.length === 0 && (
         <div className="state-screen">
           <div className="state-icon">🔍</div>
-          <p className="state-title">No products found</p>
+          <h2 className="state-title">No products found</h2>
           <p className="state-subtitle">
-            {filters.search || filters.category
-              ? 'Try adjusting your search or category filter.'
-              : 'No products have been added yet.'}
+            Try adjusting your search or filters to find what you're looking for.
           </p>
-          {(filters.search || filters.category) && (
-            <button
-              className="btn btn-outline"
-              id="clear-filters-btn"
-              onClick={() => setFilters({ search: '', category: '', sort: '' })}
-            >
-              Clear Filters
-            </button>
-          )}
+          <button
+            id="clear-filters-btn"
+            className="btn btn-outline"
+            onClick={() => handleChange({ search: '', category: '', sort: '' })}
+          >
+            Clear Filters
+          </button>
         </div>
       )}
 
-      {/* ── Products Grid ── */}
+      {/* Product Grid */}
       {!loading && !error && products.length > 0 && (
-        <div className="products-grid" role="list" aria-label="Products">
+        <div className="products-grid" id="products-grid">
           {products.map(product => (
-            <div key={product._id} role="listitem">
-              <ProductCard product={product} />
-            </div>
+            <ProductCard key={product._id} product={product} />
           ))}
         </div>
       )}
-    </main>
+
+    </div>
   );
 }

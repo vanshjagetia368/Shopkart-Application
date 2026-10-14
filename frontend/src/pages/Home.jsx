@@ -12,12 +12,11 @@ const CATEGORIES = [
 ];
 
 export default function Home() {
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const [customer, setCustomer] = useState(null);
   const [loading,  setLoading]  = useState(true);
 
-  // Fetch logged-in customer from the backend on every mount.
-  // ProtectedRoute already verified the token; this call populates UI data.
+  // Fetch the authenticated customer's profile on mount
   useEffect(() => {
     getMyProfile()
       .then(res => setCustomer(res.data))
@@ -28,153 +27,120 @@ export default function Home() {
   const initials = customer?.fullName
     ? customer.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '..';
-
   const firstName = customer?.fullName?.split(' ')[0] ?? '';
 
   return (
-    <main>
+    <main className="anim-fade-in">
 
-      {/* ══════════════════════════════════════════════════════
-          SECTION 1 — Customer Profile (Lab 02 Task 3)
-          Fetched from GET /customers/me
-      ══════════════════════════════════════════════════════ */}
-      <section className="profile-section">
-        <div className="profile-inner">
+      {/* ── Profile Hero (Task 3 — Lab 02) ──────────────── */}
+      <div className="profile-hero">
+        <div className="profile-hero-inner">
           {loading ? (
-            <div className="state-screen" style={{ padding: '60px 0' }}>
-              <div className="spinner" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px 0' }}>
+              <div className="spinner" style={{ borderTopColor: 'white', borderColor: 'rgba(255,255,255,0.3)' }} />
+              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>Loading your profile...</span>
             </div>
           ) : customer && (
-            <div className="profile-welcome animate-fade-up">
-
-              {/* Greeting */}
-              <div className="profile-greeting">
-                <div className="profile-avatar-lg">{initials}</div>
+            <>
+              <div className="profile-greeting-row">
                 <div>
-                  <h1 className="profile-name">
-                    Welcome back, <span className="gradient-text">{firstName}!</span> 👋
+                  <div className="profile-avatar-xl">{initials}</div>
+                  <h1 className="profile-hero-greeting">
+                    Welcome back, {firstName}! 👋
                   </h1>
-                  <p className="profile-tagline">Here's your ShopKart account overview</p>
+                  <p className="profile-hero-sub">Here's your ShopKart account overview</p>
                 </div>
-              </div>
-
-              {/* Info Cards */}
-              <div className="profile-cards">
-                <div className="profile-info-card">
-                  <div className="profile-info-icon">👤</div>
-                  <div>
-                    <div className="profile-info-label">Full Name</div>
-                    <div className="profile-info-value" id="profile-fullname">{customer.fullName}</div>
-                  </div>
-                </div>
-
-                <div className="profile-info-card">
-                  <div className="profile-info-icon">📧</div>
-                  <div>
-                    <div className="profile-info-label">Email Address</div>
-                    <div className="profile-info-value" id="profile-email">{customer.email}</div>
-                  </div>
-                </div>
-
-                <div className="profile-info-card">
-                  <div className="profile-info-icon">📱</div>
-                  <div>
-                    <div className="profile-info-label">Phone Number</div>
-                    <div className="profile-info-value" id="profile-phone">{customer.phone}</div>
-                  </div>
-                </div>
-
-                <div className="profile-info-card">
-                  <div className="profile-info-icon">🆔</div>
-                  <div>
-                    <div className="profile-info-label">Customer ID</div>
-                    <div className="profile-info-value" id="profile-id"
-                      style={{ fontSize: 12, wordBreak: 'break-all', color: 'var(--text-muted)' }}>
-                      {customer._id}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick actions */}
-              <div className="profile-actions">
                 <button
                   id="home-shop-btn"
-                  className="btn btn-primary"
+                  className="home-cta-btn"
                   onClick={() => navigate('/products')}
+                  style={{ alignSelf: 'flex-start' }}
                 >
                   🛍️ Start Shopping
                 </button>
               </div>
-            </div>
+
+              {/* Profile Info Tiles */}
+              <div className="profile-info-strip">
+                <div className="profile-info-tile">
+                  <div className="profile-info-tile-label">Full Name</div>
+                  <div className="profile-info-tile-value" id="profile-fullname">{customer.fullName}</div>
+                </div>
+                <div className="profile-info-tile">
+                  <div className="profile-info-tile-label">Email Address</div>
+                  <div className="profile-info-tile-value" id="profile-email">{customer.email}</div>
+                </div>
+                <div className="profile-info-tile">
+                  <div className="profile-info-tile-label">Phone Number</div>
+                  <div className="profile-info-tile-value" id="profile-phone">{customer.phone}</div>
+                </div>
+                <div className="profile-info-tile">
+                  <div className="profile-info-tile-label">Customer ID</div>
+                  <div className="profile-info-tile-value" id="profile-id"
+                    style={{ fontSize: 12, opacity: 0.8, wordBreak: 'break-all' }}>
+                    {customer._id}
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════
-          SECTION 2 — Feature Strip
-      ══════════════════════════════════════════════════════ */}
-      <div className="features-strip">
-        <div className="feature-item"><span className="feature-icon">🚚</span> Free Shipping over ₹999</div>
-        <div className="feature-item"><span className="feature-icon">🔒</span> Secure Checkout</div>
-        <div className="feature-item"><span className="feature-icon">↩️</span> Easy 30-Day Returns</div>
-        <div className="feature-item"><span className="feature-icon">🎧</span> 24/7 Customer Support</div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════
-          SECTION 3 — Browse by Category
-      ══════════════════════════════════════════════════════ */}
-      <section className="section">
-        <div className="section-header">
-          <h2 className="section-title">Browse by Category</h2>
-          <Link to="/products" className="section-link">View all →</Link>
+      {/* ── Feature Strip ───────────────────────────────── */}
+      <div className="home-features">
+        <div className="home-features-inner">
+          {[
+            ['🚚', 'Free Shipping over ₹999'],
+            ['🔒', 'Secure Checkout'],
+            ['↩️', 'Easy 30-Day Returns'],
+            ['🎧', '24/7 Customer Support'],
+          ].map(([icon, label]) => (
+            <div className="home-feature-item" key={label}>
+              <span className="home-feature-icon">{icon}</span>
+              {label}
+            </div>
+          ))}
         </div>
-        <div className="category-grid">
+      </div>
+
+      {/* ── Browse by Category ──────────────────────────── */}
+      <div className="home-section">
+        <div className="home-section-header">
+          <h2 className="home-section-title">Browse by Category</h2>
+          <Link to="/products" className="home-section-link" id="view-all-link">View all →</Link>
+        </div>
+        <div className="cat-grid">
           {CATEGORIES.map(cat => (
             <Link
               key={cat.label}
               to={`/products?category=${cat.label}`}
-              className="category-chip"
+              className="cat-chip"
               id={`category-${cat.label.toLowerCase()}`}
             >
-              <span className="category-emoji">{cat.emoji}</span>
+              <span className="cat-chip-emoji">{cat.emoji}</span>
               {cat.label}
             </Link>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* ══════════════════════════════════════════════════════
-          SECTION 4 — CTA Banner
-      ══════════════════════════════════════════════════════ */}
-      <section className="section" style={{ paddingTop: 0 }}>
-        <div
-          style={{
-            background: 'linear-gradient(135deg, rgba(108,99,255,0.15), rgba(255,101,132,0.1))',
-            border: '1px solid rgba(108,99,255,0.3)',
-            borderRadius: 'var(--radius-xl)',
-            padding: '48px 40px',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            flexWrap: 'wrap', gap: '24px',
-          }}
-        >
-          <div>
-            <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>
-              Ready to explore? 🚀
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 15 }}>
-              Browse our full catalog and find your next favourite product.
-            </p>
+      {/* ── CTA Banner ──────────────────────────────────── */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 60px' }}>
+        <div className="home-cta">
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <h2 className="home-cta-title">Ready to explore? 🚀</h2>
+            <p className="home-cta-sub">Browse our full catalog and find your next favourite product.</p>
           </div>
           <button
-            className="btn btn-primary btn-lg"
+            className="home-cta-btn"
             id="cta-browse-btn"
             onClick={() => navigate('/products')}
           >
             Browse Products →
           </button>
         </div>
-      </section>
+      </div>
 
     </main>
   );
