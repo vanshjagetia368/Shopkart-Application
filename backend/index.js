@@ -7,6 +7,7 @@ const cors = require("cors");
 const customerRoutes = require("./routes/customer.routes");
 const productRoutes  = require("./routes/product.routes");
 const wishlistRoutes = require("./routes/wishlist.routes");
+const cartRoutes     = require("./routes/cart.routes");
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use(
 app.use("/customers", customerRoutes);
 app.use("/products",  productRoutes);
 app.use("/wishlist",  wishlistRoutes); // Lab-04
+app.use("/cart",      cartRoutes);     // Lab-05
 
 // ── Health Check ─────────────────────────────────
 app.get("/", (req, res) => {
