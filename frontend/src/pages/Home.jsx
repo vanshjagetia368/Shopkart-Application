@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { getMyProfile } from '../services/api';
 
 const CATEGORIES = [
   { label: 'Electronics', emoji: '💻' },
@@ -10,37 +12,108 @@ const CATEGORIES = [
 ];
 
 export default function Home() {
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+  const [customer, setCustomer] = useState(null);
+  const [loading,  setLoading]  = useState(true);
+
+  // Fetch logged-in customer from the backend on every mount.
+  // ProtectedRoute already verified the token; this call populates UI data.
+  useEffect(() => {
+    getMyProfile()
+      .then(res => setCustomer(res.data))
+      .catch(() => navigate('/login', { replace: true }))
+      .finally(() => setLoading(false));
+  }, [navigate]);
+
+  const initials = customer?.fullName
+    ? customer.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '..';
+
+  const firstName = customer?.fullName?.split(' ')[0] ?? '';
 
   return (
     <main>
-      {/* ── Hero ──────────────────────────────────────────── */}
-      <section className="hero">
-        <div className="hero-tag">
-          <span>✨</span> New arrivals every week
-        </div>
-        <h1 className="hero-title">
-          Discover Products<br />
-          You'll <span className="gradient-text">Absolutely Love</span>
-        </h1>
-        <p className="hero-subtitle">
-          Explore thousands of curated products across electronics, fashion, home essentials and more.
-        </p>
-        <div className="hero-cta">
-          <button
-            id="hero-shop-btn"
-            className="btn btn-primary btn-lg"
-            onClick={() => navigate('/products')}
-          >
-            🛍️ Shop Now
-          </button>
-          <Link to="/register" className="btn btn-outline btn-lg" id="hero-join-btn">
-            Join Free
-          </Link>
+
+      {/* ══════════════════════════════════════════════════════
+          SECTION 1 — Customer Profile (Lab 02 Task 3)
+          Fetched from GET /customers/me
+      ══════════════════════════════════════════════════════ */}
+      <section className="profile-section">
+        <div className="profile-inner">
+          {loading ? (
+            <div className="state-screen" style={{ padding: '60px 0' }}>
+              <div className="spinner" />
+            </div>
+          ) : customer && (
+            <div className="profile-welcome animate-fade-up">
+
+              {/* Greeting */}
+              <div className="profile-greeting">
+                <div className="profile-avatar-lg">{initials}</div>
+                <div>
+                  <h1 className="profile-name">
+                    Welcome back, <span className="gradient-text">{firstName}!</span> 👋
+                  </h1>
+                  <p className="profile-tagline">Here's your ShopKart account overview</p>
+                </div>
+              </div>
+
+              {/* Info Cards */}
+              <div className="profile-cards">
+                <div className="profile-info-card">
+                  <div className="profile-info-icon">👤</div>
+                  <div>
+                    <div className="profile-info-label">Full Name</div>
+                    <div className="profile-info-value" id="profile-fullname">{customer.fullName}</div>
+                  </div>
+                </div>
+
+                <div className="profile-info-card">
+                  <div className="profile-info-icon">📧</div>
+                  <div>
+                    <div className="profile-info-label">Email Address</div>
+                    <div className="profile-info-value" id="profile-email">{customer.email}</div>
+                  </div>
+                </div>
+
+                <div className="profile-info-card">
+                  <div className="profile-info-icon">📱</div>
+                  <div>
+                    <div className="profile-info-label">Phone Number</div>
+                    <div className="profile-info-value" id="profile-phone">{customer.phone}</div>
+                  </div>
+                </div>
+
+                <div className="profile-info-card">
+                  <div className="profile-info-icon">🆔</div>
+                  <div>
+                    <div className="profile-info-label">Customer ID</div>
+                    <div className="profile-info-value" id="profile-id"
+                      style={{ fontSize: 12, wordBreak: 'break-all', color: 'var(--text-muted)' }}>
+                      {customer._id}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick actions */}
+              <div className="profile-actions">
+                <button
+                  id="home-shop-btn"
+                  className="btn btn-primary"
+                  onClick={() => navigate('/products')}
+                >
+                  🛍️ Start Shopping
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ── Feature Strip ─────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════
+          SECTION 2 — Feature Strip
+      ══════════════════════════════════════════════════════ */}
       <div className="features-strip">
         <div className="feature-item"><span className="feature-icon">🚚</span> Free Shipping over ₹999</div>
         <div className="feature-item"><span className="feature-icon">🔒</span> Secure Checkout</div>
@@ -48,7 +121,9 @@ export default function Home() {
         <div className="feature-item"><span className="feature-icon">🎧</span> 24/7 Customer Support</div>
       </div>
 
-      {/* ── Categories ────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════
+          SECTION 3 — Browse by Category
+      ══════════════════════════════════════════════════════ */}
       <section className="section">
         <div className="section-header">
           <h2 className="section-title">Browse by Category</h2>
@@ -69,7 +144,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── CTA Banner ────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════
+          SECTION 4 — CTA Banner
+      ══════════════════════════════════════════════════════ */}
       <section className="section" style={{ paddingTop: 0 }}>
         <div
           style={{
@@ -98,6 +175,7 @@ export default function Home() {
           </button>
         </div>
       </section>
+
     </main>
   );
 }
