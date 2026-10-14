@@ -1,14 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { CartProvider } from './context/CartContext';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Products from './pages/Products';
+import Navbar         from './components/Navbar';
+import Home           from './pages/Home';
+import Login          from './pages/Login';
+import Register       from './pages/Register';
+import Products       from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
-import Wishlist from './pages/Wishlist';
-import Cart from './pages/Cart';
+import Wishlist       from './pages/Wishlist';
+import Cart           from './pages/Cart';
+import Checkout       from './pages/Checkout';
+import OrderSuccess   from './pages/OrderSuccess';
+import Orders         from './pages/Orders';
 import { getMyProfile } from './services/api';
 
 // ─────────────────────────────────────────────────────────────
@@ -43,7 +46,7 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <BrowserRouter>
-      {/* CartProvider wraps entire app so Navbar + all pages share one cart state */}
+      {/* CartProvider wraps entire app — one shared cart state across all pages */}
       <CartProvider>
         <Routes>
           {/* ── Public Routes (no navbar) ── */}
@@ -59,10 +62,19 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Navigate to="/home" replace />} />
 
-                  {/* Protected routes */}
-                  <Route path="/home"     element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                  <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-                  <Route path="/cart"     element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+                  {/* Protected routes — require valid JWT cookie */}
+                  <Route path="/home"
+                    element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                  <Route path="/wishlist"
+                    element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+                  <Route path="/cart"
+                    element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+                  <Route path="/checkout"
+                    element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                  <Route path="/order-success/:id"
+                    element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
+                  <Route path="/orders"
+                    element={<ProtectedRoute><Orders /></ProtectedRoute>} />
 
                   {/* Public — product browsing */}
                   <Route path="/products"     element={<Products />} />

@@ -1,9 +1,8 @@
 import axios from "axios";
 
-// Base URL — points to Express backend
 const API = axios.create({
   baseURL: "http://localhost:5000",
-  withCredentials: true, // send HttpOnly cookies on every request
+  withCredentials: true,
 });
 
 // ── Customer / Auth ──────────────────────────────
@@ -26,10 +25,16 @@ export const removeFromWishlist = (productId) => API.delete(`/wishlist/${product
 export const toggleWishlist     = (productId) => API.patch(`/wishlist/${productId}/toggle`);
 
 // ── Cart (Lab-05) ────────────────────────────────
-export const getCart          = ()                    => API.get("/cart");
-export const addToCart        = (productId)           => API.post(`/cart/${productId}`);
-export const updateCartItem   = (productId, quantity) => API.patch(`/cart/${productId}`, { quantity });
-export const removeFromCart   = (productId)           => API.delete(`/cart/${productId}`);
-export const clearCart        = ()                    => API.delete("/cart/clear");
+export const getCart        = ()                    => API.get("/cart");
+export const addToCart      = (productId)           => API.post(`/cart/${productId}`);
+export const updateCartItem = (productId, quantity) => API.patch(`/cart/${productId}`, { quantity });
+export const removeFromCart = (productId)           => API.delete(`/cart/${productId}`);
+export const clearCart      = ()                    => API.delete("/cart/clear");
+
+// ── Orders (Lab-06) ──────────────────────────────
+export const createPaymentOrder = (shippingAddress) => API.post("/orders/create-payment-order", { shippingAddress });
+export const verifyPayment      = (data)            => API.post("/orders/verify-payment", data);
+export const getMyOrders        = ()                => API.get("/orders");
+export const getOrderById       = (id)              => API.get(`/orders/${id}`);
 
 export default API;

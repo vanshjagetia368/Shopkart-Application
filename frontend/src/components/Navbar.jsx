@@ -7,7 +7,7 @@ export default function Navbar() {
   const [user,          setUser]          = useState(null);
   const [wishlistCount, setWishlistCount] = useState(0);
   const navigate = useNavigate();
-  const { totalItems, reset } = useCart(); // live cart count from global context
+  const { totalItems, reset } = useCart();
 
   useEffect(() => {
     getMyProfile()
@@ -22,7 +22,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await logoutCustomer();
-      reset(); // clear global cart state
+      reset();
       setUser(null);
       setWishlistCount(0);
       navigate('/login');
@@ -35,13 +35,14 @@ export default function Navbar() {
     ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : null;
 
-  const Badge = ({ count, color = 'var(--primary)', bg = 'var(--primary-ghost)' }) =>
+  const Badge = ({ count }) =>
     count > 0 ? (
       <span style={{
-        background: color === 'var(--danger)' ? 'var(--danger)' : 'var(--primary)',
-        color: 'white', fontSize: 10, fontWeight: 800, lineHeight: 1,
+        background: 'var(--primary)', color: 'white',
+        fontSize: 10, fontWeight: 800, lineHeight: 1,
         padding: '2px 6px', borderRadius: 'var(--r-full)',
-        minWidth: 18, textAlign: 'center', animation: 'scaleIn 0.2s ease',
+        minWidth: 18, textAlign: 'center',
+        animation: 'scaleIn 0.2s ease',
       }}>
         {count}
       </span>
@@ -51,13 +52,10 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
 
-        {/* Logo */}
         <Link to="/home" className="navbar-logo" id="nav-logo">
-          ShopKart
-          <span className="navbar-logo-dot" />
+          ShopKart<span className="navbar-logo-dot" />
         </Link>
 
-        {/* Centre Links */}
         <div className="navbar-links">
           <NavLink to="/home" id="nav-home-link"
             className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}>
@@ -69,7 +67,6 @@ export default function Navbar() {
             Products
           </NavLink>
 
-          {/* Wishlist with count badge */}
           <NavLink to="/wishlist" id="nav-wishlist-link"
             className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}
             style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -77,16 +74,21 @@ export default function Navbar() {
             <Badge count={wishlistCount} />
           </NavLink>
 
-          {/* Cart with live count badge from CartContext */}
+          {/* Live cart count from CartContext */}
           <NavLink to="/cart" id="nav-cart-link"
             className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}
             style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             Cart
             <Badge count={totalItems} />
           </NavLink>
+
+          {/* Orders link */}
+          <NavLink to="/orders" id="nav-orders-link"
+            className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}>
+            Orders
+          </NavLink>
         </div>
 
-        {/* Right Actions */}
         <div className="navbar-actions">
           {user ? (
             <>

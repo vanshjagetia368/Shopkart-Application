@@ -171,7 +171,7 @@ export default function Cart() {
             <button
               id="checkout-btn"
               className="btn btn-primary btn-full btn-lg"
-              onClick={() => alert('Checkout coming in Lab-06! 🚀')}
+              onClick={() => navigate('/checkout')}
             >
               Proceed to Checkout →
             </button>
