@@ -12,6 +12,9 @@ const orderRoutes    = require("./routes/order.routes");
 
 const app = express();
 
+// Trust reverse proxy (needed for Render / HTTPS cookies)
+app.set("trust proxy", 1);
+
 // ── Middleware ───────────────────────────────────
 app.use(express.json());                   // Parse incoming JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies

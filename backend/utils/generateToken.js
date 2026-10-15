@@ -14,10 +14,11 @@ const generateToken = (res, customerId) => {
   );
 
   // Store token in an HttpOnly cookie so JS cannot access it (XSS protection)
+  const isProduction = process.env.NODE_ENV === "production";
   res.cookie("token", token, {
     httpOnly: true,                                    // Not accessible via document.cookie
-    secure: process.env.NODE_ENV === "production",    // HTTPS only in production
-    sameSite: "strict",                               // CSRF protection
+    secure: isProduction,                              // HTTPS only in production
+    sameSite: isProduction ? "none" : "lax",           // "none" required for cross-subdomain Render apps
     maxAge: 7 * 24 * 60 * 60 * 1000,                // 7 days in milliseconds
   });
 

@@ -137,8 +137,11 @@ const getMyProfile = async (req, res) => {
 const logoutCustomer = async (req, res) => {
   try {
     // Clear the token cookie by setting maxAge to 0
+    const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", "", {
       httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       expires: new Date(0),
     });
 
